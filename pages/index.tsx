@@ -12,9 +12,21 @@ import Container from "@mui/material/Container";
 import FormControl from "@mui/material/FormControl";
 import Image from "next/image";
 import Link from "next/link";
+import { TextField } from "@mui/material";
+import { useRouter } from "next/router";
 
 export default function Home() {
-    const [specialite, setSpecialite] = React.useState(undefined);
+    const router = useRouter();
+
+    const [specialite, setSpecialite] = React.useState("tout");
+    const [annee, setAnnee] = React.useState("tout");
+    const [motCle, setMotCle] = React.useState("");
+
+    const handleSearch = () => {
+        const href = `/profiles?specialite=${specialite}&annee=${annee}`;
+        if (motCle) return router.push(href.concat(`&motCle=${motCle}`));
+        router.push(href);
+    };
 
     return (
         <>
@@ -85,55 +97,65 @@ export default function Home() {
                             </InputLabel>
                             <Select
                                 labelId="speciality-select"
-                                value={"age"}
+                                value={specialite}
                                 label="Spécialité"
-                                // onChange={}
+                                onChange={(e) => setSpecialite(e.target.value)}
                             >
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
+                                <MenuItem value="tout">Tout</MenuItem>
+                                <MenuItem value="OPSL">OPSL</MenuItem>
+                                <MenuItem value="TNI">TNI</MenuItem>
+                                <MenuItem value="IAN">IAN</MenuItem>
                             </Select>
                         </FormControl>
                         <FormControl
                             sx={{ m: 1, minWidth: 120, width: "100%" }}
                             size="small"
                         >
-                            <InputLabel id="demo-select-small">Age</InputLabel>
+                            <InputLabel id="annee-select">Année</InputLabel>
                             <Select
-                                labelId="demo-select-small"
-                                id="demo-select-small"
-                                value={specialite || ""}
-                                label="Age"
-                                // onChange={}
+                                labelId="annee-select"
+                                value={annee}
+                                label="Année"
+                                onChange={(e) => setAnnee(e.target.value)}
                             >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
+                                <MenuItem value={"tout"}>Tout</MenuItem>
+                                <MenuItem value={2020}>2020</MenuItem>
+                                <MenuItem value={2021}>2021</MenuItem>
+                                <MenuItem value={2022}>2022</MenuItem>
+                                <MenuItem value={2023}>2023</MenuItem>
                             </Select>
                         </FormControl>
                         <FormControl
                             sx={{ m: 1, minWidth: 120, width: "100%" }}
                             size="small"
                         >
-                            <InputLabel id="demo-select-small">Age</InputLabel>
-                            <Select
-                                labelId="demo-select-small"
-                                id="demo-select-small"
-                                value={"age"}
-                                label="Age"
-                                // onChange={}
-                            >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
-                            </Select>
+                            <TextField
+                                label="Mot clé"
+                                defaultValue=""
+                                size="small"
+                                value={motCle}
+                                onChange={(e) => setMotCle(e.target.value)}
+                            />
                         </FormControl>
+                    </Box>
+                    <Box
+                        sx={{
+                            marginTop: "3rem",
+                        }}
+                    >
+                        <Button
+                            variant="contained"
+                            sx={{
+                                padding: "1rem 2rem",
+                                backgroundColor: "#5d0532",
+                                "&:hover": {
+                                    backgroundColor: "#7d0945",
+                                },
+                            }}
+                            onClick={handleSearch}
+                        >
+                            Recherche
+                        </Button>
                     </Box>
                 </Box>
             </Container>
