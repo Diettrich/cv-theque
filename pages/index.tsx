@@ -7,7 +7,6 @@ import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
-import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import FormControl from "@mui/material/FormControl";
 import Image from "next/image";
@@ -23,7 +22,7 @@ export default function Home() {
     const [motCle, setMotCle] = React.useState("");
 
     const handleSearch = () => {
-        const href = `/profiles?specialite=${specialite}&annee=${annee}`;
+        const href = `/profiles?specialite=${specialite}&annee=${annee}&page=1`;
         if (motCle) return router.push(href.concat(`&motCle=${motCle}`));
         router.push(href);
     };
@@ -47,7 +46,7 @@ export default function Home() {
                 </AppBar>
             </Box>
 
-            <Container fixed className="main-section">
+            <Container fixed>
                 <Box
                     sx={{
                         display: "flex",

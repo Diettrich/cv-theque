@@ -7,37 +7,60 @@ import {
     CardMedia,
     Container,
     Grid,
+    Pagination,
     Toolbar,
     Typography,
 } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
-export default function Profiles({ profiles }: { profiles: any[] }) {
+export default function Profiles({
+    profiles,
+    pageCount,
+    pageSize,
+}: {
+    profiles: any[];
+    pageCount: number;
+    pageSize: number;
+}) {
+    const router = useRouter();
+    console.log(router.query);
+
+    const loadProfile = (id: string) => () => {
+        router.push(`/profile/${id}`);
+    };
+
+    const handleChangePage = (event: any, value: number) => {
+        const href = `/profiles?specialite=${router.query.specialite}&annee=${router.query.annee}&page=${value}`;
+        if (router.query.motCle)
+            return router.push(href.concat(`&motCle=${router.query.motCle}`));
+        router.push(href);
+    };
+
     return (
         <>
             <Box sx={{ flexGrow: 1 }}>
                 <AppBar position="fixed" className="app-bar">
                     <Toolbar>
-                        <div>
-                            <Link href="/">
-                                <Image
-                                    alt="logo"
-                                    src="/logo.svg"
-                                    width={200}
-                                    height={100}
-                                />
-                            </Link>
-                        </div>
+                        <Link href="/">
+                            <Image
+                                alt="logo"
+                                src="/logo.svg"
+                                width={200}
+                                height={100}
+                            />
+                        </Link>
                     </Toolbar>
                 </AppBar>
             </Box>
 
-            <Container fixed className="main-section">
+            <Container fixed>
                 <Box
                     sx={{
-                        height: "calc(100vh - 100px)",
+                        minHeight: "calc(100vh - 200px)",
                         marginTop: "100px",
+                        marginBottom: "100px",
                         paddingTop: "4rem",
                     }}
                 >
@@ -54,7 +77,9 @@ export default function Profiles({ profiles }: { profiles: any[] }) {
                                     key={eleve.id}
                                 >
                                     <Card sx={{ width: "100%" }}>
-                                        <CardActionArea>
+                                        <CardActionArea
+                                            onClick={loadProfile(eleve.id)}
+                                        >
                                             <CardMedia
                                                 component="img"
                                                 height="340"
@@ -104,59 +129,55 @@ export default function Profiles({ profiles }: { profiles: any[] }) {
                                                                 .filiere
                                                         }
                                                     </Typography>
-                                                    {/* <Typography variant="body1">
-                                                    {eleve.attributes.filiere}
-                                                </Typography> */}
                                                 </Box>
-                                                {/* <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                Lizards are a widespread group
-                                                of squamate reptiles, with over
-                                                6,000 species, ranging across
-                                                all continents except Antarctica
-                                            </Typography> */}
                                             </CardContent>
                                         </CardActionArea>
                                     </Card>
-                                    {/* <Box
-                                    sx={{
-                                        height: "400px",
-                                        width: "100%",
-                                        border: "1px red solid",
-                                    }}
-                                >
-                                    anouar
-                                </Box> */}
                                 </Grid>
                             ))}
                     </Grid>
-                    {/* {JSON.stringify(profiles)} */}
+                    <Box
+                        sx={{
+                            marginTop: "4rem",
+                            display: "flex",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Pagination
+                            count={pageCount}
+                            onChange={handleChangePage}
+                            size="large"
+                            shape="rounded"
+                        />
+                    </Box>
                 </Box>
             </Container>
         </>
     );
 }
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: any) {
     let root = "http://127.0.0.1:1337/api/";
     let query = root + "eleves?populate=photo_profil&";
 
     query += Object.entries(context.query)
         .filter((elem) => {
+            const key = elem[0];
             const value = elem[1];
+            if (key === "page") return false;
             return !!value && value !== "tout";
         })
         .map((elem) => {
             const key = elem[0];
             const value = elem[1];
             if (key === "motCle")
-                return `filters[sujet_pfe][$contains]=${value}`;
+                return `filters[$or][0][sujet_pfe][$contains]=${value}&filters[$or][1][entreprise_pfe][$contains]=${value}`;
             if (key === "specialite") return `filters[filiere][$eq]=${value}`;
             if (key === "annee") return `filters[promotion][$eq]=${value}`;
         })
         .join("&");
+
+    query += `&pagination[page]=${context.query.page}&pagination[pageSize]=12`;
 
     console.log(query);
 
@@ -164,6 +185,10 @@ export async function getServerSideProps(context) {
     const resJson = await response.json();
 
     return {
-        props: { profiles: resJson.data },
+        props: {
+            profiles: resJson.data,
+            pageCount: resJson.meta.pagination.pageCount,
+            pageSize: resJson.meta.pagination.pageSize,
+        },
     };
 }
